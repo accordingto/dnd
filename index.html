@@ -1,1 +1,617 @@
-DND YA
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DND English Quest</title>
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #1a1a2e;
+    --card: #16213e;
+    --border: #e2b04a;
+    --gold: #e2b04a;
+    --gold-light: #f5d68a;
+    --red: #c0392b;
+    --green: #27ae60;
+    --text: #f0e6d3;
+    --muted: #8a7a6a;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Georgia', serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--gold);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-shadow: 0 0 12px rgba(226,176,74,0.4);
+  }
+
+  header h1 span { color: var(--text); font-size: 1rem; display: block; letter-spacing: 1px; font-weight: normal; }
+
+  /* ── Turn Tracker ── */
+  #turn-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  #turn-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  #current-speaker {
+    background: var(--gold);
+    color: #000;
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 6px 18px;
+    border-radius: 99px;
+    min-width: 120px;
+    text-align: center;
+  }
+
+  #btn-next-turn {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background .2s;
+  }
+  #btn-next-turn:hover { background: rgba(226,176,74,0.15); }
+
+  /* ── Main Grid ── */
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    grid-template-rows: auto auto;
+    gap: 18px;
+    padding: 18px 24px;
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* ── Scenario Card ── */
+  #scenario-section {
+    grid-column: 1;
+    grid-row: 1;
+    background: var(--card);
+    border: 2px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 30px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    position: relative;
+    min-height: 240px;
+  }
+
+  .section-tag {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+
+  #scenario-text {
+    font-size: 1.7rem;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  #scenario-question {
+    font-size: 1.2rem;
+    color: var(--gold-light);
+    font-style: italic;
+  }
+
+  #vocab-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(226,176,74,0.12);
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 1rem;
+    margin-top: 4px;
+    width: fit-content;
+  }
+
+  #vocab-badge .vocab-word {
+    color: var(--gold);
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+
+  #btn-new-scenario {
+    align-self: flex-end;
+    background: var(--gold);
+    color: #000;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-family: 'Georgia', serif;
+    font-weight: bold;
+    transition: opacity .2s;
+    margin-top: auto;
+  }
+  #btn-new-scenario:hover { opacity: 0.85; }
+
+  /* ── Dice Section ── */
+  #dice-section {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    background: var(--card);
+    border: 2px solid #3a3a5c;
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  #dice-section .section-tag { text-align: center; }
+
+  #dice-face {
+    width: 120px;
+    height: 120px;
+    background: var(--surface);
+    border: 3px solid var(--gold);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--gold);
+    cursor: pointer;
+    user-select: none;
+    transition: transform .1s;
+    box-shadow: 0 0 20px rgba(226,176,74,0.2);
+    position: relative;
+  }
+  #dice-face:hover { box-shadow: 0 0 30px rgba(226,176,74,0.4); }
+  #dice-face.rolling { animation: shake .5s ease; }
+
+  @keyframes shake {
+    0%,100% { transform: rotate(0deg) scale(1); }
+    20%      { transform: rotate(-15deg) scale(1.1); }
+    40%      { transform: rotate(15deg) scale(1.15); }
+    60%      { transform: rotate(-10deg) scale(1.1); }
+    80%      { transform: rotate(10deg) scale(1.05); }
+  }
+
+  #dice-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  #prompt-type {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-align: center;
+    width: 100%;
+  }
+  #prompt-type .type-name {
+    font-size: 1.2rem;
+    color: var(--gold-light);
+    font-weight: bold;
+    display: block;
+    margin-bottom: 4px;
+  }
+  #prompt-type .type-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  #btn-roll {
+    background: var(--red);
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-family: 'Georgia', serif;
+    font-weight: bold;
+    width: 100%;
+    transition: opacity .2s;
+  }
+  #btn-roll:hover { opacity: 0.85; }
+
+  /* roll history */
+  #roll-history {
+    width: 100%;
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.8;
+    text-align: center;
+    border-top: 1px solid #2a2a40;
+    padding-top: 10px;
+  }
+
+  /* ── Character Cards ── */
+  #character-section {
+    grid-column: 1;
+    grid-row: 2;
+    background: var(--card);
+    border: 2px solid #3a3a5c;
+    border-radius: var(--radius);
+    padding: 24px 28px;
+  }
+
+  #character-section header {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  #cards-grid {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .char-card {
+    background: var(--surface);
+    border: 1px solid #3a3a5c;
+    border-radius: 10px;
+    padding: 14px 18px;
+    min-width: 160px;
+    flex: 1;
+    position: relative;
+    transition: border-color .2s;
+  }
+  .char-card.active { border-color: var(--gold); box-shadow: 0 0 12px rgba(226,176,74,0.2); }
+
+  .char-card .char-name { font-size: 1.1rem; color: var(--gold); font-weight: bold; }
+  .char-card .char-class { font-size: 0.85rem; color: var(--muted); margin: 2px 0 6px; }
+  .char-card .char-trait { font-size: 0.9rem; font-style: italic; color: var(--text); }
+  .char-card .char-remove {
+    position: absolute;
+    top: 8px; right: 10px;
+    background: none; border: none;
+    color: var(--muted); cursor: pointer; font-size: 1rem;
+  }
+  .char-card .char-remove:hover { color: var(--red); }
+
+  .add-player-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .add-player-row input {
+    background: var(--surface);
+    border: 1px solid #3a3a5c;
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-family: 'Georgia', serif;
+    flex: 1;
+    min-width: 120px;
+  }
+  .add-player-row input:focus { outline: none; border-color: var(--gold); }
+  .add-player-row button {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background .2s;
+  }
+  .add-player-row button:hover { background: rgba(226,176,74,0.15); }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    main { grid-template-columns: 1fr; grid-template-rows: auto; }
+    #dice-section { grid-column: 1; grid-row: auto; }
+    #character-section { grid-column: 1; grid-row: auto; }
+    #scenario-text { font-size: 1.3rem; }
+  }
+
+  /* ── Ornament ── */
+  .ornament { color: var(--gold); opacity: 0.4; font-size: 1.2rem; margin: 0 6px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER + TURN TRACKER ═══ -->
+<header>
+  <h1>⚔ DND English Quest <span>Speak your adventure</span></h1>
+  <div id="turn-bar">
+    <span id="turn-label">Now Speaking:</span>
+    <div id="current-speaker">—</div>
+    <button id="btn-next-turn" onclick="nextTurn()">Next Turn ▶</button>
+  </div>
+</header>
+
+<!-- ═══ MAIN LAYOUT ═══ -->
+<main>
+
+  <!-- Scenario Card -->
+  <section id="scenario-section">
+    <div class="section-tag">⚡ Scenario Prompt</div>
+    <div id="scenario-text">Press "New Scenario" to begin your adventure...</div>
+    <div id="scenario-question" style="display:none"></div>
+    <div id="vocab-badge" style="display:none">
+      <span class="ornament">✦</span>
+      <span>Vocabulary:</span>
+      <span class="vocab-word" id="vocab-word"></span>
+      <span id="vocab-meaning" style="color:var(--muted); font-size:0.85rem"></span>
+    </div>
+    <button id="btn-new-scenario" onclick="newScenario()">New Scenario ✦</button>
+  </section>
+
+  <!-- Dice Roller -->
+  <section id="dice-section">
+    <div class="section-tag">🎲 D20 Dice Roller</div>
+    <div id="dice-face" onclick="rollDice()">d20</div>
+    <div id="dice-label">Click the die to roll</div>
+    <div id="prompt-type">
+      <span class="type-name">—</span>
+      <span class="type-desc">Roll to reveal your conversation challenge</span>
+    </div>
+    <button id="btn-roll" onclick="rollDice()">Roll the Dice!</button>
+    <div id="roll-history">Last rolls: —</div>
+  </section>
+
+  <!-- Character Cards -->
+  <section id="character-section">
+    <header>
+      <div class="section-tag" style="margin:0">🧙 Character Cards</div>
+    </header>
+    <div id="cards-grid">
+      <div style="color:var(--muted); font-size:0.9rem; font-style:italic; padding: 8px 0;">
+        Add players below to generate their characters.
+      </div>
+    </div>
+    <div class="add-player-row">
+      <input type="text" id="player-name-input" placeholder="Enter player name..." onkeydown="if(event.key==='Enter') addPlayer()" />
+      <button onclick="addPlayer()">+ Add Player</button>
+      <button onclick="clearAll()" style="border-color:var(--red); color:var(--red);">Clear All</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ══════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════
+const scenarios = [
+  {
+    text: "You enter a dimly lit tavern. A hooded stranger slides a mysterious letter across the table.",
+    question: "What do you say to the stranger? How do you react?",
+    vocab: "suspicious", meaning: "(adj) feeling doubt or distrust"
+  },
+  {
+    text: "A dragon blocks the mountain path. It stares at your party with curious golden eyes.",
+    question: "Do you fight, talk, or run? Describe your decision to the group.",
+    vocab: "negotiate", meaning: "(v) to discuss in order to reach an agreement"
+  },
+  {
+    text: "You discover a hidden treasure chest in the dungeon. Another adventurer arrives at the same moment.",
+    question: "How do you handle sharing — or not sharing — the treasure?",
+    vocab: "compromise", meaning: "(n/v) a settlement where both sides give something up"
+  },
+  {
+    text: "Your party is lost in a haunted forest. Strange lights flicker between the trees.",
+    question: "What is your plan? How do you convince your team to follow you?",
+    vocab: "navigate", meaning: "(v) to find your way through a difficult place or situation"
+  },
+  {
+    text: "The king summons your party. He needs brave heroes for a dangerous mission.",
+    question: "Introduce yourself to the king. Why should he choose you?",
+    vocab: "courageous", meaning: "(adj) not deterred by danger or pain; brave"
+  },
+  {
+    text: "A villager is crying in the market. Their child has gone missing in the woods.",
+    question: "How do you comfort them? What questions do you ask to help?",
+    vocab: "reassure", meaning: "(v) to say or do things to make someone feel less worried"
+  },
+  {
+    text: "You find an ancient magic item but none of you know what it does.",
+    question: "Describe what the item looks like. What do you think it might do?",
+    vocab: "mysterious", meaning: "(adj) difficult or impossible to understand or explain"
+  },
+  {
+    text: "After a long battle your party is exhausted and low on supplies.",
+    question: "What do you suggest the group do next? How do you motivate them?",
+    vocab: "persevere", meaning: "(v) to continue in a course of action despite difficulty"
+  },
+  {
+    text: "A friendly wizard offers to teach your party one powerful spell each.",
+    question: "What spell would you choose and why? Convince the wizard you deserve it.",
+    vocab: "persuade", meaning: "(v) to cause someone to believe or do something through reasoning"
+  },
+  {
+    text: "You reach the final dungeon door. Behind it lies the ultimate treasure — or ultimate danger.",
+    question: "How do you feel at this moment? Describe it to your party before you open the door.",
+    vocab: "anticipation", meaning: "(n) excitement or anxiety about a future event"
+  }
+];
+
+const dicePrompts = {
+  "1-5":   { name: "Describe It",  desc: "Describe what you see, feel, or smell in the scene. Use at least 3 details." },
+  "6-10":  { name: "Make a Decision", desc: "Your party is waiting. Say your plan out loud and explain WHY." },
+  "11-15": { name: "Roleplay",     desc: "Speak in character! React as your D&D character would — stay in role." },
+  "16-19": { name: "Ask a Question", desc: "Ask another player a question about the scene. They must answer in English." },
+  "20":    { name: "⭐ CRITICAL HIT!", desc: "You lead this scene. Tell a short story about what your character does. Everyone listens!" }
+};
+
+const classes = ["Warrior","Mage","Rogue","Paladin","Ranger","Bard","Cleric","Druid"];
+const traits   = ["brave","mysterious","funny","wise","clumsy","curious","fierce","kind","sarcastic","optimistic"];
+
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+let players = [];
+let currentTurn = -1;
+let rollHistory = [];
+
+// ══════════════════════════════════════
+//  SCENARIO
+// ══════════════════════════════════════
+function newScenario() {
+  const s = scenarios[Math.floor(Math.random() * scenarios.length)];
+  document.getElementById('scenario-text').textContent = s.text;
+  const q = document.getElementById('scenario-question');
+  q.textContent = '👉 ' + s.question;
+  q.style.display = 'block';
+  const badge = document.getElementById('vocab-badge');
+  document.getElementById('vocab-word').textContent = s.vocab;
+  document.getElementById('vocab-meaning').textContent = '— ' + s.meaning;
+  badge.style.display = 'inline-flex';
+}
+
+// ══════════════════════════════════════
+//  DICE
+// ══════════════════════════════════════
+function rollDice() {
+  const face = document.getElementById('dice-face');
+  face.classList.remove('rolling');
+  void face.offsetWidth;
+  face.classList.add('rolling');
+  face.textContent = '?';
+
+  setTimeout(() => {
+    const result = Math.floor(Math.random() * 20) + 1;
+    face.textContent = result;
+    face.classList.remove('rolling');
+    document.getElementById('dice-label').textContent = `You rolled a ${result}!`;
+
+    let key;
+    if      (result <= 5)  key = "1-5";
+    else if (result <= 10) key = "6-10";
+    else if (result <= 15) key = "11-15";
+    else if (result <= 19) key = "16-19";
+    else                   key = "20";
+
+    const pt = dicePrompts[key];
+    const box = document.getElementById('prompt-type');
+    box.querySelector('.type-name').textContent = pt.name;
+    box.querySelector('.type-desc').textContent = pt.desc;
+
+    rollHistory.unshift(result);
+    if (rollHistory.length > 5) rollHistory.pop();
+    document.getElementById('roll-history').textContent =
+      'Last rolls: ' + rollHistory.join(' · ');
+  }, 500);
+}
+
+// ══════════════════════════════════════
+//  TURN TRACKER
+// ══════════════════════════════════════
+function renderTurn() {
+  const el = document.getElementById('current-speaker');
+  if (players.length === 0) { el.textContent = '—'; return; }
+  el.textContent = players[currentTurn]?.name || '—';
+  document.querySelectorAll('.char-card').forEach((c, i) => {
+    c.classList.toggle('active', i === currentTurn);
+  });
+}
+
+function nextTurn() {
+  if (players.length === 0) return;
+  currentTurn = (currentTurn + 1) % players.length;
+  renderTurn();
+}
+
+// ══════════════════════════════════════
+//  CHARACTER CARDS
+// ══════════════════════════════════════
+function addPlayer() {
+  const input = document.getElementById('player-name-input');
+  const name = input.value.trim();
+  if (!name) return;
+  const cls   = classes[Math.floor(Math.random() * classes.length)];
+  const trait = traits[Math.floor(Math.random() * traits.length)];
+  players.push({ name, cls, trait });
+  input.value = '';
+  if (currentTurn === -1) currentTurn = 0;
+  renderCards();
+  renderTurn();
+}
+
+function removePlayer(i) {
+  players.splice(i, 1);
+  if (players.length === 0) currentTurn = -1;
+  else if (currentTurn >= players.length) currentTurn = 0;
+  renderCards();
+  renderTurn();
+}
+
+function clearAll() {
+  players = [];
+  currentTurn = -1;
+  renderCards();
+  renderTurn();
+}
+
+function renderCards() {
+  const grid = document.getElementById('cards-grid');
+  if (players.length === 0) {
+    grid.innerHTML = '<div style="color:var(--muted); font-size:0.9rem; font-style:italic; padding:8px 0;">Add players below to generate their characters.</div>';
+    return;
+  }
+  grid.innerHTML = players.map((p, i) => `
+    <div class="char-card ${i === currentTurn ? 'active' : ''}">
+      <button class="char-remove" onclick="removePlayer(${i})">✕</button>
+      <div class="char-name">${p.name}</div>
+      <div class="char-class">${p.cls}</div>
+      <div class="char-trait">"I am ${p.trait}."</div>
+    </div>
+  `).join('');
+}
+</script>
+</body>
+</html>
