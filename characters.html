@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>角色卡產生器 — DND 英語冒險團</title>
+  <style>
+    :root {
+      --bg: #0d0d1a;
+      --card: #1e1e35;
+      --gold: #d4a843;
+      --gold-l: #f0c96a;
+      --border: #2e2e50;
+      --text: #e8dfc8;
+      --muted: #7a7a9a;
+      --red: #c0392b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      background-image: radial-gradient(ellipse at 20% 20%, #1a0a3a55 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 80%, #3a0a0a55 0%, transparent 60%);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,13,26,.85);
+      backdrop-filter: blur(6px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    nav a { color: var(--muted); text-decoration: none; font-size: .85rem; transition: color .2s; }
+    nav a:hover { color: var(--gold); }
+    nav .sep { color: var(--border); }
+    nav .title { color: var(--text); font-weight: 700; font-size: 1rem; margin-left: auto; }
+
+    .hero {
+      text-align: center;
+      padding: 52px 20px 36px;
+    }
+    .hero-emoji {
+      font-size: 4rem;
+      display: block;
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+    .hero h1 { font-size: 2rem; font-weight: 900; color: var(--gold); text-shadow: 0 0 30px rgba(212,168,67,.3); margin-bottom: 8px; }
+    .hero p  { font-size: .9rem; color: var(--muted); }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 0 20px 32px;
+    }
+    .controls input {
+      background: #12122a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: .95rem;
+      min-width: 180px;
+    }
+    .controls input:focus { outline: none; border-color: var(--gold); }
+    .controls button {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .btn-add  { background: var(--gold); color: #000; }
+    .btn-all  { background: transparent; border: 1px solid var(--gold) !important; color: var(--gold); }
+    .btn-clear{ background: transparent; border: 1px solid var(--red) !important; color: var(--red); }
+    .controls button:hover { opacity: .8; }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 18px;
+      padding: 0 28px 60px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .char-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 26px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      animation: pop .3s ease;
+      position: relative;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .char-card:hover { border-color: var(--gold); box-shadow: 0 6px 24px rgba(212,168,67,.12); }
+    @keyframes pop {
+      from { transform: scale(.9); opacity: 0; }
+      to   { transform: scale(1);  opacity: 1; }
+    }
+
+    .char-emoji { font-size: 2.4rem; }
+    .char-name  { font-size: 1.2rem; font-weight: 700; color: #fff; }
+    .char-class {
+      display: inline-block;
+      font-size: .65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(212,168,67,.12);
+      color: var(--gold);
+      width: fit-content;
+    }
+    .char-intro {
+      font-size: .9rem;
+      color: var(--text);
+      font-style: italic;
+      line-height: 1.5;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+    .char-prompt {
+      font-size: .8rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .char-remove {
+      position: absolute; top: 12px; right: 14px;
+      background: none; border: none; color: var(--muted); cursor: pointer; font-size: .9rem;
+    }
+    .char-remove:hover { color: var(--red); }
+
+    .empty-hint {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--muted);
+      font-size: .9rem;
+      font-style: italic;
+      padding: 40px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html">⚔️ 主選單</a>
+    <span class="sep">/</span>
+    <span class="title">🧙 角色卡產生器</span>
+  </nav>
+
+  <div class="hero">
+    <span class="hero-emoji">🧙</span>
+    <h1>角色卡產生器</h1>
+    <p>輸入玩家名稱，系統自動分配職業與特質，<br>用英文自我介紹，展開冒險！</p>
+  </div>
+
+  <div class="controls">
+    <input type="text" id="name-input" placeholder="輸入玩家名稱…" onkeydown="if(event.key==='Enter') addOne()" />
+    <button class="btn-add" onclick="addOne()">+ 新增角色</button>
+    <button class="btn-all" onclick="addAll()">✦ 一次產生 5 張</button>
+    <button class="btn-clear" onclick="clearAll()">清除全部</button>
+  </div>
+
+  <div id="grid">
+    <div class="empty-hint">尚未新增任何玩家。請輸入名稱並按下「新增角色」。</div>
+  </div>
+
+<script>
+const classData = [
+  { name:"Warrior", emoji:"⚔️", intro:"I am a strong warrior. I never give up in battle.", prompt:"Tell us: what weapon do you carry and why?" },
+  { name:"Mage",    emoji:"🧙", intro:"I am a wise mage. I solve problems with magic and knowledge.", prompt:"Tell us: what is the most powerful spell you know?" },
+  { name:"Rogue",   emoji:"🗡️", intro:"I am a clever rogue. I move quietly and act fast.", prompt:"Tell us: describe a time you escaped from danger." },
+  { name:"Paladin", emoji:"🛡️", intro:"I am a noble paladin. I protect the weak and fight for justice.", prompt:"Tell us: what is the bravest thing you have ever done?" },
+  { name:"Ranger",  emoji:"🏹", intro:"I am a skilled ranger. I know every forest and mountain path.", prompt:"Tell us: what animal would be your companion and why?" },
+  { name:"Bard",    emoji:"🎸", intro:"I am a charming bard. I tell stories and inspire my friends.", prompt:"Tell us: sing or say one line of your favourite song." },
+  { name:"Cleric",  emoji:"✨", intro:"I am a devoted cleric. I heal my allies and bless our journey.", prompt:"Tell us: what do you pray for before a dangerous mission?" },
+  { name:"Druid",   emoji:"🌿", intro:"I am a nature druid. I speak to animals and command the wild.", prompt:"Tell us: if you could transform into any animal, what would it be?" }
+];
+
+const traits = ["brave","mysterious","funny","wise","clumsy","curious","fierce","kind","sarcastic","optimistic"];
+const defaultNames = ["Alice","Bob","Carol","Dave","Eve"];
+
+let cards = [];
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function addOne(forceName) {
+  const input = document.getElementById('name-input');
+  const name = forceName || input.value.trim();
+  if (!name) return;
+  cards.push({ name, cls: pick(classData), trait: pick(traits) });
+  if (!forceName) input.value = '';
+  render();
+}
+
+function addAll() {
+  defaultNames.forEach(n => cards.push({ name: n, cls: pick(classData), trait: pick(traits) }));
+  render();
+}
+
+function removeCard(i) {
+  cards.splice(i, 1);
+  render();
+}
+
+function clearAll() {
+  cards = [];
+  render();
+}
+
+function render() {
+  const grid = document.getElementById('grid');
+  if (!cards.length) {
+    grid.innerHTML = '<div class="empty-hint">尚未新增任何玩家。請輸入名稱並按下「新增角色」。</div>';
+    return;
+  }
+  grid.innerHTML = cards.map((c, i) => `
+    <div class="char-card">
+      <button class="char-remove" onclick="removeCard(${i})">✕</button>
+      <span class="char-emoji">${c.cls.emoji}</span>
+      <div class="char-name">${c.name}</div>
+      <span class="char-class">${c.cls.name}</span>
+      <div class="char-intro">"${c.cls.intro} I am ${c.trait}."</div>
+      <div class="char-prompt">💬 ${c.cls.prompt}</div>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>

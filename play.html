@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>情境對話練習 — DND 英語冒險團</title>
+  <style>
+    :root {
+      --bg: #0d0d1a;
+      --card: #1e1e35;
+      --gold: #d4a843;
+      --gold-l: #f0c96a;
+      --border: #2e2e50;
+      --text: #e8dfc8;
+      --muted: #7a7a9a;
+      --red: #c0392b;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      background-image: radial-gradient(ellipse at 20% 20%, #1a0a3a55 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 80%, #3a0a0a55 0%, transparent 60%);
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,13,26,.85);
+      backdrop-filter: blur(6px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .85rem;
+      transition: color .2s;
+    }
+    nav a:hover { color: var(--gold); }
+    nav .sep { color: var(--border); }
+    nav .title { color: var(--text); font-weight: 700; font-size: 1rem; margin-left: auto; }
+
+    /* ── TURN BANNER ── */
+    #turn-banner {
+      background: rgba(212,168,67,.1);
+      border-bottom: 1px solid rgba(212,168,67,.2);
+      padding: 10px 28px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    #turn-banner .label { font-size: .8rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+    #current-speaker {
+      background: var(--gold);
+      color: #000;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 5px 18px;
+      border-radius: 99px;
+      min-width: 110px;
+      text-align: center;
+    }
+    #btn-next {
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 5px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: .82rem;
+      transition: background .2s;
+    }
+    #btn-next:hover { background: rgba(212,168,67,.12); }
+
+    /* ── MAIN ── */
+    main {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 20px;
+      padding: 24px 28px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── SECTION SHARED ── */
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 26px 28px;
+    }
+    .section-tag {
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      color: var(--gold);
+      margin-bottom: 14px;
+    }
+
+    /* ── SCENARIO ── */
+    #scenario-section { grid-column: 1; grid-row: 1; }
+    #scenario-text {
+      font-size: 1.6rem;
+      line-height: 1.55;
+      margin-bottom: 14px;
+    }
+    #scenario-question {
+      font-size: 1.05rem;
+      color: var(--gold-l);
+      font-style: italic;
+      margin-bottom: 16px;
+      display: none;
+    }
+    #vocab-badge {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: rgba(212,168,67,.08);
+      border: 1px solid rgba(212,168,67,.3);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: .9rem;
+      width: fit-content;
+      margin-bottom: 20px;
+    }
+    #vocab-badge .word { color: var(--gold); font-weight: 700; font-size: 1rem; }
+    #vocab-badge .meaning { color: var(--muted); font-size: .82rem; }
+    #btn-scenario {
+      background: var(--gold);
+      color: #000;
+      border: none;
+      padding: 11px 26px;
+      border-radius: 10px;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    #btn-scenario:hover { opacity: .85; }
+
+    /* ── DICE ── */
+    #dice-section {
+      grid-column: 2;
+      grid-row: 1 / 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+    #dice-face {
+      width: 110px;
+      height: 110px;
+      background: #12122a;
+      border: 2px solid var(--gold);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.6rem;
+      font-weight: 900;
+      color: var(--gold);
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 0 24px rgba(212,168,67,.15);
+      transition: box-shadow .2s;
+    }
+    #dice-face:hover { box-shadow: 0 0 36px rgba(212,168,67,.3); }
+    #dice-face.rolling { animation: shake .5s ease; }
+    @keyframes shake {
+      0%,100% { transform: rotate(0) scale(1); }
+      20%     { transform: rotate(-14deg) scale(1.1); }
+      40%     { transform: rotate(14deg) scale(1.15); }
+      60%     { transform: rotate(-8deg) scale(1.1); }
+      80%     { transform: rotate(8deg) scale(1.05); }
+    }
+    #dice-hint { font-size: .78rem; color: var(--muted); text-align: center; }
+    #prompt-box {
+      width: 100%;
+      background: #12122a;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    #prompt-name { font-size: 1.1rem; color: var(--gold-l); font-weight: 700; display: block; margin-bottom: 6px; }
+    #prompt-desc { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+    #btn-roll {
+      width: 100%;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    #btn-roll:hover { opacity: .85; }
+    #roll-log { font-size: .75rem; color: var(--muted); text-align: center; border-top: 1px solid var(--border); padding-top: 12px; line-height: 1.8; }
+
+    /* ── PLAYERS ── */
+    #player-section { grid-column: 1; grid-row: 2; }
+    #cards-grid { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; min-height: 36px; }
+    .p-card {
+      background: #12122a;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      flex: 1;
+      min-width: 140px;
+      position: relative;
+      transition: border-color .2s;
+    }
+    .p-card.active { border-color: var(--gold); box-shadow: 0 0 14px rgba(212,168,67,.15); }
+    .p-card .p-name { font-size: 1rem; font-weight: 700; color: var(--gold); }
+    .p-card .p-class { font-size: .78rem; color: var(--muted); margin: 2px 0 5px; }
+    .p-card .p-trait { font-size: .85rem; font-style: italic; }
+    .p-card .p-remove {
+      position: absolute; top: 8px; right: 10px;
+      background: none; border: none; color: var(--muted); cursor: pointer; font-size: .9rem;
+    }
+    .p-card .p-remove:hover { color: var(--red); }
+    .p-empty { font-size: .85rem; color: var(--muted); font-style: italic; padding: 6px 0; }
+
+    .add-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .add-row input {
+      flex: 1;
+      min-width: 130px;
+      background: #12122a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-size: .9rem;
+    }
+    .add-row input:focus { outline: none; border-color: var(--gold); }
+    .add-row button {
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 9px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: .85rem;
+      transition: background .2s;
+      white-space: nowrap;
+    }
+    .add-row button:hover { background: rgba(212,168,67,.1); }
+    .add-row .btn-clear { border-color: var(--red); color: var(--red); }
+    .add-row .btn-clear:hover { background: rgba(192,57,43,.1); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      main { grid-template-columns: 1fr; padding: 16px; }
+      #dice-section { grid-column: 1; grid-row: auto; }
+      #player-section { grid-row: auto; }
+      #scenario-text { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html">⚔️ 主選單</a>
+    <span class="sep">/</span>
+    <span class="title">🎭 情境對話練習</span>
+  </nav>
+
+  <div id="turn-banner">
+    <span class="label">現在發言：</span>
+    <div id="current-speaker">—</div>
+    <button id="btn-next" onclick="nextTurn()">下一位 ▶</button>
+  </div>
+
+  <main>
+
+    <!-- 情境卡 -->
+    <section class="section" id="scenario-section">
+      <div class="section-tag">⚡ 情境提示</div>
+      <div id="scenario-text">按下「新情境」開始你的冒險…</div>
+      <div id="scenario-question"></div>
+      <div id="vocab-badge">
+        <span>✦ 詞彙：</span>
+        <span class="word" id="vocab-word"></span>
+        <span class="meaning" id="vocab-meaning"></span>
+      </div>
+      <button id="btn-scenario" onclick="newScenario()">新情境 ✦</button>
+    </section>
+
+    <!-- 骰子 -->
+    <section class="section" id="dice-section">
+      <div class="section-tag">🎲 D20 骰子</div>
+      <div id="dice-face" onclick="rollDice()">d20</div>
+      <div id="dice-hint">點擊骰子或按下方按鈕</div>
+      <div id="prompt-box">
+        <span id="prompt-name">—</span>
+        <span id="prompt-desc">擲骰以解鎖對話任務</span>
+      </div>
+      <button id="btn-roll" onclick="rollDice()">擲骰！</button>
+      <div id="roll-log">最近紀錄：—</div>
+    </section>
+
+    <!-- 玩家卡 -->
+    <section class="section" id="player-section">
+      <div class="section-tag">🧙 玩家角色</div>
+      <div id="cards-grid">
+        <div class="p-empty">新增玩家以產生角色卡</div>
+      </div>
+      <div class="add-row">
+        <input type="text" id="name-input" placeholder="輸入玩家名稱…" onkeydown="if(event.key==='Enter') addPlayer()" />
+        <button onclick="addPlayer()">+ 新增</button>
+        <button class="btn-clear" onclick="clearAll()">清除</button>
+      </div>
+    </section>
+
+  </main>
+
+<script>
+const scenarios = [
+  { text:"你走進一間昏暗的酒館。一位戴兜帽的陌生人把一封神秘信件推到桌上。", question:"👉 你對陌生人說什麼？你的反應是什麼？", vocab:"suspicious", meaning:"多疑的、可疑的" },
+  { text:"一條巨龍擋在山路上，用好奇的金色眼睛盯著你的隊伍。", question:"👉 你要戰鬥、談判還是逃跑？向大家說明你的決定。", vocab:"negotiate", meaning:"談判、協商" },
+  { text:"你在地下城發現一個藏寶箱。就在這時，另一個冒險者也出現了。", question:"👉 你打算怎麼處理這份寶藏？和隊友一起討論。", vocab:"compromise", meaning:"妥協、折衷" },
+  { text:"你的隊伍在鬼魂森林中迷路了。樹木間閃爍著奇怪的光。", question:"👉 你的計畫是什麼？如何說服隊友跟著你走？", vocab:"navigate", meaning:"導航、找路" },
+  { text:"國王召見你的隊伍，需要勇敢的英雄去執行危險任務。", question:"👉 向國王自我介紹。說明為什麼應該選你。", vocab:"courageous", meaning:"勇敢的、有膽量的" },
+  { text:"市場上一個村民在哭泣，他的孩子在森林中失蹤了。", question:"👉 你如何安慰他？你會問哪些問題來幫助他？", vocab:"reassure", meaning:"安撫、使安心" },
+  { text:"你找到一件古老的魔法物品，但沒有人知道它的用途。", question:"👉 描述這件物品的外觀。你猜它有什麼能力？", vocab:"mysterious", meaning:"神秘的、不可思議的" },
+  { text:"經過一場漫長的戰鬥，隊伍已精疲力竭，補給也快見底了。", question:"👉 你建議接下來怎麼做？如何鼓勵大家振作？", vocab:"persevere", meaning:"堅持不懈、持續努力" },
+  { text:"一位友善的法師願意傳授你的隊伍各一個強大咒語。", question:"👉 你選哪個咒語？為什麼你最值得擁有它？", vocab:"persuade", meaning:"說服、勸服" },
+  { text:"你站在最後一道地下城的門前，門後是至高無上的寶藏——或終極危險。", question:"👉 此刻你的心情是什麼？在開門之前告訴你的隊友。", vocab:"anticipation", meaning:"期待、預感" }
+];
+
+const prompts = {
+  "1-5":   { name:"📢 描述它！",   desc:"描述你所看到、感受到或聞到的場景。至少說出 3 個細節。" },
+  "6-10":  { name:"🧭 做決定！",   desc:"隊伍在等你。大聲說出你的計畫，並說明「為什麼」。" },
+  "11-15": { name:"🎭 角色扮演！", desc:"進入角色！以你的 D&D 角色身份反應——保持角色狀態。" },
+  "16-19": { name:"❓ 提問！",     desc:"向另一位玩家提出一個關於場景的問題，對方必須用英文回答。" },
+  "20":    { name:"⭐ 致命一擊！", desc:"你來主導這個場景！說一個關於你角色的小故事。所有人聆聽！" }
+};
+
+const classes = ["Warrior","Mage","Rogue","Paladin","Ranger","Bard","Cleric","Druid"];
+const traits  = ["brave","mysterious","funny","wise","clumsy","curious","fierce","kind","sarcastic","optimistic"];
+
+let players = [], current = -1, history = [];
+
+function newScenario() {
+  const s = scenarios[Math.floor(Math.random() * scenarios.length)];
+  document.getElementById('scenario-text').textContent = s.text;
+  const q = document.getElementById('scenario-question');
+  q.textContent = s.question;
+  q.style.display = 'block';
+  document.getElementById('vocab-word').textContent = s.vocab;
+  document.getElementById('vocab-meaning').textContent = '— ' + s.meaning;
+  document.getElementById('vocab-badge').style.display = 'flex';
+}
+
+function rollDice() {
+  const face = document.getElementById('dice-face');
+  face.classList.remove('rolling');
+  void face.offsetWidth;
+  face.classList.add('rolling');
+  face.textContent = '?';
+  setTimeout(() => {
+    const n = Math.floor(Math.random() * 20) + 1;
+    face.textContent = n;
+    face.classList.remove('rolling');
+    document.getElementById('dice-hint').textContent = `你擲出了 ${n}！`;
+    const key = n <= 5 ? "1-5" : n <= 10 ? "6-10" : n <= 15 ? "11-15" : n < 20 ? "16-19" : "20";
+    const p = prompts[key];
+    document.getElementById('prompt-name').textContent = p.name;
+    document.getElementById('prompt-desc').textContent = p.desc;
+    history.unshift(n);
+    if (history.length > 6) history.pop();
+    document.getElementById('roll-log').textContent = '最近紀錄：' + history.join(' · ');
+  }, 500);
+}
+
+function renderTurn() {
+  const el = document.getElementById('current-speaker');
+  el.textContent = players.length ? players[current]?.name : '—';
+  document.querySelectorAll('.p-card').forEach((c, i) => c.classList.toggle('active', i === current));
+}
+
+function nextTurn() {
+  if (!players.length) return;
+  current = (current + 1) % players.length;
+  renderTurn();
+}
+
+function addPlayer() {
+  const input = document.getElementById('name-input');
+  const name = input.value.trim();
+  if (!name) return;
+  players.push({ name, cls: classes[Math.floor(Math.random()*classes.length)], trait: traits[Math.floor(Math.random()*traits.length)] });
+  input.value = '';
+  if (current === -1) current = 0;
+  renderCards();
+  renderTurn();
+}
+
+function removePlayer(i) {
+  players.splice(i, 1);
+  if (!players.length) current = -1;
+  else if (current >= players.length) current = 0;
+  renderCards(); renderTurn();
+}
+
+function clearAll() {
+  players = []; current = -1;
+  renderCards(); renderTurn();
+}
+
+function renderCards() {
+  const grid = document.getElementById('cards-grid');
+  if (!players.length) {
+    grid.innerHTML = '<div class="p-empty">新增玩家以產生角色卡</div>';
+    return;
+  }
+  grid.innerHTML = players.map((p, i) => `
+    <div class="p-card ${i === current ? 'active' : ''}">
+      <button class="p-remove" onclick="removePlayer(${i})">✕</button>
+      <div class="p-name">${p.name}</div>
+      <div class="p-class">${p.cls}</div>
+      <div class="p-trait">"I am ${p.trait}."</div>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>
