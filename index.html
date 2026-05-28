@@ -1,218 +1,500 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DND 英語冒險團 — 主選單</title>
-  <style>
-    :root {
-      --bg: #0d0d1a;
-      --card: #1e1e35;
-      --gold: #d4a843;
-      --gold-l: #f0c96a;
-      --border: #2e2e50;
-      --text: #e8dfc8;
-      --muted: #7a7a9a;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
-      background-image: radial-gradient(ellipse at 20% 30%, #1a0a3a55 0%, transparent 60%),
-                        radial-gradient(ellipse at 80% 70%, #3a0a0a55 0%, transparent 60%);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DND 英語冒險團</title>
+<style>
+:root {
+  --bg: #0d0d1a;
+  --card: #1e1e35;
+  --gold: #d4a843;
+  --gold-l: #f0c96a;
+  --border: #2e2e50;
+  --text: #e8dfc8;
+  --muted: #7a7a9a;
+  --green: #27ae60;
+  --red: #c0392b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, #1a0a3a55 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, #3a0a0a55 0%, transparent 60%);
+}
 
-    .hero {
-      text-align: center;
-      margin-bottom: 52px;
-    }
+/* ── SCREENS ── */
+.screen { display: none; flex-direction: column; align-items: center; min-height: 100vh; padding: 40px 20px; }
+.screen.active { display: flex; }
 
-    .hero-emoji {
-      font-size: 5rem;
-      display: block;
-      margin-bottom: 20px;
-      animation: float 3s ease-in-out infinite;
-    }
+/* ═══════════════════════════
+   SCREEN 1 — SETUP
+═══════════════════════════ */
+#screen-setup {
+  justify-content: center;
+  gap: 32px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
 
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(-12px); }
-    }
+.logo { text-align: center; }
+.logo .emoji { font-size: 4.5rem; display: block; animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.logo h1 { font-size: 2.4rem; font-weight: 900; color: var(--gold); text-shadow: 0 0 30px rgba(212,168,67,.4); margin: 12px 0 6px; }
+.logo p  { color: var(--muted); font-size: .9rem; }
 
-    .hero h1 {
-      font-size: 2.8rem;
-      font-weight: 900;
-      color: var(--gold);
-      text-shadow: 0 0 40px rgba(212,168,67,.4);
-      letter-spacing: .04em;
-      margin-bottom: 10px;
-    }
+.setup-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 30px 28px;
+  width: 100%;
+}
+.setup-box h2 { font-size: 1rem; color: var(--gold); margin-bottom: 18px; letter-spacing: .05em; }
 
-    .hero p {
-      font-size: 1rem;
-      color: var(--muted);
-      line-height: 1.6;
-    }
+.player-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; min-height: 40px; }
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #12122a;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  animation: pop .25s ease;
+}
+@keyframes pop { from{transform:scale(.95);opacity:0} to{transform:scale(1);opacity:1} }
+.player-row .p-emoji { font-size: 1.4rem; }
+.player-row .p-info  { flex: 1; }
+.player-row .p-name  { font-size: 1rem; font-weight: 700; }
+.player-row .p-class { font-size: .75rem; color: var(--gold); }
+.player-row .p-del   { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 4px; }
+.player-row .p-del:hover { color: var(--red); }
 
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
-      width: 100%;
-      max-width: 900px;
-    }
+.add-row { display: flex; gap: 8px; }
+.add-row input {
+  flex: 1;
+  background: #12122a;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 11px 14px;
+  border-radius: 10px;
+  font-size: .95rem;
+}
+.add-row input:focus { outline: none; border-color: var(--gold); }
+.add-row input::placeholder { color: var(--muted); }
 
-    .game-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px 24px;
-      text-decoration: none;
-      color: inherit;
-      transition: transform .2s, border-color .2s, box-shadow .2s;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+.btn { border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; padding: 12px 22px; transition: opacity .2s, transform .1s; }
+.btn:hover  { opacity: .85; }
+.btn:active { transform: scale(.97); }
+.btn-gold  { background: var(--gold); color: #000; }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn-green { background: var(--green); color: #fff; font-size: 1.1rem; width: 100%; padding: 16px; }
+.btn-red   { background: var(--red); color: #fff; }
 
-    .game-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--gold);
-      box-shadow: 0 8px 30px rgba(212,168,67,.15);
-    }
+#btn-start { margin-top: 8px; }
+#start-hint { text-align: center; font-size: .8rem; color: var(--muted); margin-top: 6px; }
 
-    .card-emoji { font-size: 2.8rem; }
+/* ═══════════════════════════
+   SCREEN 2 — GAME
+═══════════════════════════ */
+#screen-game {
+  gap: 18px;
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 24px 20px 40px;
+}
 
-    .card-tag {
-      display: inline-block;
-      font-size: .65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .15em;
-      padding: 3px 10px;
-      border-radius: 20px;
-      background: rgba(212,168,67,.15);
-      color: var(--gold);
-      width: fit-content;
-    }
+/* Turn bar */
+#turn-bar {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.turn-label { font-size: .8rem; color: var(--muted); white-space: nowrap; }
+#speaker-pill {
+  background: var(--gold);
+  color: #000;
+  font-weight: 900;
+  font-size: 1.1rem;
+  padding: 6px 20px;
+  border-radius: 99px;
+  flex: 1;
+  text-align: center;
+  min-width: 120px;
+}
+#btn-next-turn { margin-left: auto; white-space: nowrap; }
 
-    .card-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #fff;
-    }
+/* Scenario card */
+#scenario-card {
+  width: 100%;
+  background: var(--card);
+  border: 2px solid var(--gold);
+  border-radius: 20px;
+  padding: 30px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.card-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .15em; color: var(--gold); }
+#scene-text  { font-size: 1.5rem; line-height: 1.55; }
+#task-text   { font-size: 1rem; color: var(--gold-l); font-style: italic; border-top: 1px solid var(--border); padding-top: 14px; display: none; }
 
-    .card-desc {
-      font-size: .85rem;
-      color: var(--muted);
-      line-height: 1.6;
-      flex: 1;
-    }
+/* vocab */
+#vocab-row {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  background: rgba(212,168,67,.08);
+  border: 1px solid rgba(212,168,67,.25);
+  border-radius: 10px;
+  padding: 10px 16px;
+}
+#vocab-row .v-label { font-size: .75rem; color: var(--muted); }
+#vocab-row .v-word  { font-size: 1.05rem; font-weight: 700; color: var(--gold); }
+#vocab-row .v-def   { font-size: .8rem; color: var(--muted); }
 
-    .card-arrow {
-      font-size: .85rem;
-      color: var(--gold);
-      font-weight: 600;
-      margin-top: 4px;
-    }
+#btn-new-scene { align-self: flex-end; }
 
-    .coming-soon {
-      opacity: .45;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
+/* Dice section */
+#dice-row {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+#dice-face {
+  width: 90px;
+  height: 90px;
+  background: #12122a;
+  border: 2px solid var(--gold);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--gold);
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+  box-shadow: 0 0 20px rgba(212,168,67,.1);
+  transition: box-shadow .2s;
+}
+#dice-face:hover { box-shadow: 0 0 30px rgba(212,168,67,.25); }
+#dice-face.rolling { animation: shake .45s ease; }
+@keyframes shake {
+  0%,100%{transform:rotate(0) scale(1)}
+  25%{transform:rotate(-12deg) scale(1.1)}
+  50%{transform:rotate(12deg) scale(1.12)}
+  75%{transform:rotate(-6deg) scale(1.06)}
+}
+.dice-info { flex: 1; }
+.dice-info .d-hint { font-size: .8rem; color: var(--muted); margin-bottom: 8px; }
+.dice-info .d-result-name { font-size: 1.1rem; font-weight: 700; color: var(--gold-l); }
+.dice-info .d-result-desc { font-size: .85rem; color: var(--muted); line-height: 1.5; margin-top: 4px; }
 
-    .coming-soon .card-tag {
-      background: rgba(122,122,154,.15);
-      color: var(--muted);
-    }
+/* bottom row */
+#bottom-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+#roll-log { font-size: .78rem; color: var(--muted); }
+#btn-end-game { }
 
-    footer {
-      margin-top: 52px;
-      font-size: .78rem;
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.8;
-    }
-  </style>
+/* Player chips */
+#player-chips {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.chip {
+  background: #12122a;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font-size: .82rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: border-color .2s;
+}
+.chip.active { border-color: var(--gold); color: var(--gold); font-weight: 700; }
+.chip .c-class { color: var(--muted); font-size: .72rem; }
+
+@media (max-width: 500px) {
+  #scene-text { font-size: 1.2rem; }
+  #dice-row { flex-direction: column; align-items: flex-start; }
+}
+</style>
 </head>
 <body>
 
-  <div class="hero">
-    <span class="hero-emoji">⚔️</span>
+<!-- ══════════════════════════════
+     SCREEN 1 — SETUP
+══════════════════════════════ -->
+<div class="screen active" id="screen-setup">
+
+  <div class="logo">
+    <span class="emoji">⚔️</span>
     <h1>DND 英語冒險團</h1>
-    <p>English Quest Adventure<br>選擇你的冒險，開口說英語！</p>
+    <p>開口說英語，展開你的冒險！</p>
   </div>
 
-  <div class="card-grid">
-
-    <a class="game-card" href="play.html">
-      <span class="card-emoji">🎭</span>
-      <span class="card-tag">v1.0 — 已上線</span>
-      <div class="card-title">情境對話練習</div>
-      <div class="card-desc">
-        隨機抽出 D&D 場景，用英文描述、決策、角色扮演！<br>
-        包含骰子、詞彙聚焦、發言順序追蹤。
-      </div>
-      <div class="card-arrow">開始遊戲 →</div>
-    </a>
-
-    <a class="game-card" href="characters.html">
-      <span class="card-emoji">🧙</span>
-      <span class="card-tag">v1.0 — 已上線</span>
-      <div class="card-title">角色卡產生器</div>
-      <div class="card-desc">
-        每位玩家隨機獲得職業與個人特質，<br>
-        用英文自我介紹，開啟冒險！
-      </div>
-      <div class="card-arrow">產生角色 →</div>
-    </a>
-
-    <div class="game-card coming-soon">
-      <span class="card-emoji">🏰</span>
-      <span class="card-tag">即將推出</span>
-      <div class="card-title">地下城闖關</div>
-      <div class="card-desc">
-        五道難關，三條岔路，完成英語挑戰才能繼續！<br>
-        骰子決定命運，技能只能使用一次。
-      </div>
-      <div class="card-arrow">敬請期待</div>
+  <div class="setup-box">
+    <h2>第一步：新增玩家（最多 5 人）</h2>
+    <div class="player-list" id="player-list"></div>
+    <div class="add-row">
+      <input type="text" id="name-input" placeholder="輸入玩家名稱…" maxlength="16"
+        onkeydown="if(event.key==='Enter') addPlayer()" />
+      <button class="btn btn-gold" onclick="addPlayer()">+ 新增</button>
     </div>
-
-    <div class="game-card coming-soon">
-      <span class="card-emoji">📖</span>
-      <span class="card-tag">即將推出</span>
-      <div class="card-title">詞彙冒險</div>
-      <div class="card-desc">
-        每場冒險學會一個新英文單字，<br>
-        在對話中自然使用它來解鎖下一關。
-      </div>
-      <div class="card-arrow">敬請期待</div>
-    </div>
-
-    <div class="game-card coming-soon">
-      <span class="card-emoji">🐉</span>
-      <span class="card-tag">即將推出</span>
-      <div class="card-title">巨龍談判</div>
-      <div class="card-desc">
-        不打不殺！用英語說服巨龍放行，<br>
-        考驗你的表達能力與臨場反應。
-      </div>
-      <div class="card-arrow">敬請期待</div>
-    </div>
-
   </div>
 
-  <footer>
-    DND 英語冒險團 © 2026 &nbsp;·&nbsp; 讓開口說英語變得有趣
-  </footer>
+  <div style="width:100%; max-width:600px;">
+    <button class="btn btn-green" id="btn-start" onclick="startGame()" disabled>
+      🗡️ 開始遊戲！
+    </button>
+    <div id="start-hint">請先新增至少 1 位玩家</div>
+  </div>
 
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN 2 — GAME
+══════════════════════════════ -->
+<div class="screen" id="screen-game">
+
+  <!-- 玩家頭像列 -->
+  <div id="player-chips"></div>
+
+  <!-- 發言提示 -->
+  <div id="turn-bar">
+    <span class="turn-label">現在輪到：</span>
+    <div id="speaker-pill">—</div>
+    <button class="btn btn-ghost" id="btn-next-turn" onclick="nextTurn()">下一位 ▶</button>
+  </div>
+
+  <!-- 情境卡 -->
+  <div id="scenario-card">
+    <span class="card-label">⚡ 情境</span>
+    <div id="scene-text">按下「新情境」開始第一個場景…</div>
+    <div id="task-text"></div>
+    <div id="vocab-row">
+      <span class="v-label">本場詞彙：</span>
+      <span class="v-word" id="v-word"></span>
+      <span class="v-def" id="v-def"></span>
+    </div>
+    <button class="btn btn-gold" id="btn-new-scene" onclick="newScene()">新情境 ✦</button>
+  </div>
+
+  <!-- 骰子 -->
+  <div id="dice-row">
+    <div id="dice-face" onclick="rollDice()">d20</div>
+    <div class="dice-info">
+      <div class="d-hint">擲骰子，決定這一輪的對話任務：</div>
+      <div class="d-result-name" id="d-name">—</div>
+      <div class="d-result-desc" id="d-desc">點擊左邊的骰子或按下方按鈕</div>
+    </div>
+    <button class="btn btn-red" onclick="rollDice()">擲骰！</button>
+  </div>
+
+  <!-- 底部 -->
+  <div id="bottom-row">
+    <div id="roll-log">尚未擲骰</div>
+    <button class="btn btn-ghost" id="btn-end-game" onclick="endGame()">← 返回設定</button>
+  </div>
+
+</div>
+
+<script>
+// ── DATA ──
+const CLASSES = [
+  { name:"Warrior", emoji:"⚔️" },
+  { name:"Mage",    emoji:"🧙" },
+  { name:"Rogue",   emoji:"🗡️" },
+  { name:"Paladin", emoji:"🛡️" },
+  { name:"Ranger",  emoji:"🏹" },
+  { name:"Bard",    emoji:"🎸" },
+  { name:"Cleric",  emoji:"✨" },
+  { name:"Druid",   emoji:"🌿" }
+];
+
+const SCENES = [
+  { text:"你走進一間昏暗的酒館。一位戴兜帽的陌生人把一封神秘信件推到桌上。",
+    task:"你對陌生人說什麼？",     vocab:"suspicious",   def:"多疑的" },
+  { text:"一條巨龍擋在山路上，用好奇的眼睛盯著你的隊伍。",
+    task:"你要戰鬥、談判還是逃跑？告訴大家你的決定。", vocab:"negotiate", def:"談判、協商" },
+  { text:"你在地下城發現一個藏寶箱。就在這時，另一個冒險者也出現了。",
+    task:"你打算怎麼處理這份寶藏？", vocab:"compromise", def:"妥協、折衷" },
+  { text:"你的隊伍在鬼魂森林中迷路了。樹木間閃爍著奇怪的光。",
+    task:"你的計畫是什麼？如何說服隊友跟著你？",   vocab:"navigate",  def:"找路、導航" },
+  { text:"國王召見你的隊伍，需要勇敢的英雄去執行危險任務。",
+    task:"向國王自我介紹，說明為什麼應該選你。",   vocab:"courageous", def:"勇敢的" },
+  { text:"一個村民在哭泣，他的孩子在森林中失蹤了。",
+    task:"你如何安慰他？你會問哪些問題？",        vocab:"reassure",  def:"安撫、使安心" },
+  { text:"你找到一件古老的魔法物品，但沒有人知道它的用途。",
+    task:"描述這件物品的外觀，猜猜它有什麼能力。", vocab:"mysterious", def:"神秘的" },
+  { text:"一場漫長的戰鬥之後，你的隊伍精疲力竭，補給快見底了。",
+    task:"你建議接下來怎麼做？如何鼓勵大家振作？", vocab:"persevere",  def:"堅持不懈" },
+  { text:"一位法師願意傳授你一個強大咒語。",
+    task:"你選哪個咒語？為什麼你最值得擁有它？",  vocab:"persuade",  def:"說服" },
+  { text:"你站在最後一道地下城的門前。門後是傳說中的寶藏——或是終極危險。",
+    task:"此刻你的心情是什麼？在開門前告訴隊友。", vocab:"anticipation", def:"期待、預感" }
+];
+
+const DICE_TASKS = {
+  "1-5":   { name:"📢 描述！",     desc:"描述你所看到的場景，至少說出 3 個細節。" },
+  "6-10":  { name:"🧭 做決定！",   desc:"說出你的計畫，並說明「為什麼」。" },
+  "11-15": { name:"🎭 角色扮演！", desc:"進入角色，以你的角色身份說話。" },
+  "16-19": { name:"❓ 提問！",     desc:"向另一位玩家提問，對方必須用英文回答。" },
+  "20":    { name:"⭐ 致命一擊！", desc:"由你主導這個場景，說一個關於你角色的小故事！" }
+};
+
+// ── STATE ──
+let players  = [];
+let turnIdx  = 0;
+let rollLog  = [];
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// ── SETUP ──
+function addPlayer() {
+  if (players.length >= 5) return;
+  const input = document.getElementById('name-input');
+  const name  = input.value.trim();
+  if (!name) return;
+  players.push({ name, cls: pick(CLASSES) });
+  input.value = '';
+  renderPlayerList();
+  updateStartBtn();
+}
+
+function removePlayer(i) {
+  players.splice(i, 1);
+  renderPlayerList();
+  updateStartBtn();
+}
+
+function renderPlayerList() {
+  const el = document.getElementById('player-list');
+  el.innerHTML = players.map((p, i) => `
+    <div class="player-row">
+      <span class="p-emoji">${p.cls.emoji}</span>
+      <div class="p-info">
+        <div class="p-name">${p.name}</div>
+        <div class="p-class">${p.cls.name}</div>
+      </div>
+      <button class="p-del" onclick="removePlayer(${i})">✕</button>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:.85rem;font-style:italic;padding:4px 0">尚無玩家</div>';
+}
+
+function updateStartBtn() {
+  const btn  = document.getElementById('btn-start');
+  const hint = document.getElementById('start-hint');
+  const ok   = players.length > 0;
+  btn.disabled = !ok;
+  hint.textContent = ok
+    ? `共 ${players.length} 位玩家，點擊開始遊戲！`
+    : '請先新增至少 1 位玩家';
+}
+
+// ── GAME ──
+function startGame() {
+  turnIdx = 0;
+  rollLog = [];
+  document.getElementById('screen-setup').classList.remove('active');
+  document.getElementById('screen-game').classList.add('active');
+  renderChips();
+  renderTurn();
+  // reset
+  document.getElementById('scene-text').textContent = '按下「新情境」開始第一個場景…';
+  document.getElementById('task-text').style.display = 'none';
+  document.getElementById('vocab-row').style.display = 'none';
+  document.getElementById('d-name').textContent = '—';
+  document.getElementById('d-desc').textContent = '點擊左邊的骰子或按下方按鈕';
+  document.getElementById('dice-face').textContent = 'd20';
+  document.getElementById('roll-log').textContent = '尚未擲骰';
+}
+
+function endGame() {
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('screen-setup').classList.add('active');
+}
+
+function renderChips() {
+  document.getElementById('player-chips').innerHTML =
+    players.map((p, i) => `
+      <div class="chip ${i === turnIdx ? 'active' : ''}">
+        ${p.cls.emoji} ${p.name} <span class="c-class">${p.cls.name}</span>
+      </div>`).join('');
+}
+
+function renderTurn() {
+  document.getElementById('speaker-pill').textContent =
+    players[turnIdx] ? `${players[turnIdx].cls.emoji} ${players[turnIdx].name}` : '—';
+  renderChips();
+}
+
+function nextTurn() {
+  if (!players.length) return;
+  turnIdx = (turnIdx + 1) % players.length;
+  renderTurn();
+}
+
+function newScene() {
+  const s = pick(SCENES);
+  document.getElementById('scene-text').textContent = s.text;
+  const task = document.getElementById('task-text');
+  task.textContent = '👉 ' + s.task;
+  task.style.display = 'block';
+  document.getElementById('v-word').textContent = s.vocab;
+  document.getElementById('v-def').textContent  = '(' + s.def + ')';
+  document.getElementById('vocab-row').style.display = 'flex';
+}
+
+function rollDice() {
+  const face = document.getElementById('dice-face');
+  face.classList.remove('rolling');
+  void face.offsetWidth;
+  face.classList.add('rolling');
+  face.textContent = '?';
+  setTimeout(() => {
+    const n   = Math.floor(Math.random() * 20) + 1;
+    face.textContent = n;
+    face.classList.remove('rolling');
+    const key = n <= 5 ? "1-5" : n <= 10 ? "6-10" : n <= 15 ? "11-15" : n < 20 ? "16-19" : "20";
+    const t   = DICE_TASKS[key];
+    document.getElementById('d-name').textContent = t.name;
+    document.getElementById('d-desc').textContent = t.desc;
+    rollLog.unshift(n);
+    if (rollLog.length > 8) rollLog.pop();
+    document.getElementById('roll-log').textContent = '骰子紀錄：' + rollLog.join(' · ');
+  }, 450);
+}
+</script>
 </body>
 </html>
